@@ -34,15 +34,21 @@ jobs:
       run: dotnet publish -c Release
 
     - name: Upload Debug build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: debug-build
         path: |
           **/bin/Debug/net8.0/wasi-wasm/AppBundle/
 
     - name: Upload Release build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: release-build
         path: |
           **/bin/Release/net8.0/wasi-wasm/AppBundle/
+
+    - name: Upload World build artifacts as bot artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: bot
+        path: bin/Release/net8.0/wasi-wasm/AppBundle/world/
