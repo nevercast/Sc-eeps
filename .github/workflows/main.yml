@@ -1,0 +1,48 @@
+name: Build Screeps DotNet Project
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup .NET 8 SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.x'
+
+    - name: Install WASI workload
+      run: dotnet workload install wasi-experimental
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build Debug
+      run: dotnet publish -c Debug
+
+    - name: Build Release
+      run: dotnet publish -c Release
+
+    - name: Upload Debug build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: debug-build
+        path: |
+          **/bin/Debug/net8.0/wasi-wasm/AppBundle/
+
+    - name: Upload Release build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-build
+        path: |
+          **/bin/Release/net8.0/wasi-wasm/AppBundle/
