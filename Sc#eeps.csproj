@@ -14,7 +14,6 @@
     <UseSystemResourceKeys>true</UseSystemResourceKeys>
     <InvariantTimezone>true</InvariantTimezone>
     <WasmEnableSIMD>true</WasmEnableSIMD>
-    <WasmEnableExceptionHandling>true</WasmEnableExceptionHandling>
     <WasmEnableBulkMemory>true</WasmEnableBulkMemory>
 </PropertyGroup>
 
