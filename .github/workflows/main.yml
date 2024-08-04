@@ -62,4 +62,4 @@ jobs:
       env:
         SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
         SCREEPS_HOST: ${{ secrets.SCREEPS_HOST }}
-      run: python upload_bot.py
+      run: python .github/workflows/upload_bot.py
