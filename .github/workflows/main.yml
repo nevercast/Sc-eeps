@@ -52,3 +52,14 @@ jobs:
       with:
         name: bot
         path: bin/Release/net8.0/wasi-wasm/AppBundle/world/
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Upload bot.zip to Screeps
+      env:
+        SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
+        SCREEPS_HOST: ${{ secrets.SCREEPS_HOST }}
+      run: python upload_bot.py
