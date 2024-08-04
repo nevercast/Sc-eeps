@@ -5,9 +5,9 @@ import json
 
 # Load environment variables for credentials
 SCREEPS_TOKEN = os.getenv('SCREEPS_TOKEN')
-SCREEPS_HOST = os.getenv('SCREEPS_HOST', 'screeps.com')
 
-# Path to the bot.zip file
+# Fixed variables
+SCREEPS_HOST = 'screeps.com'
 ZIP_FILE_PATH = 'bot.zip'
 
 def upload_bot(zip_file_path, token):

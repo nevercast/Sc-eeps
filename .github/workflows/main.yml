@@ -69,5 +69,4 @@ jobs:
     - name: Upload bot.zip to Screeps
       env:
         SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
-        SCREEPS_HOST: ${{ secrets.SCREEPS_HOST }}
-      run: python .github/workflows/upload_bot.py
+      run: python .github/workflows/upload.py
