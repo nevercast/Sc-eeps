@@ -2,23 +2,37 @@ import os
 import zipfile
 import http.client
 import json
+import sys
 
 # Load environment variables for credentials
 SCREEPS_TOKEN = os.getenv('SCREEPS_TOKEN')
 
 # Fixed variables
 SCREEPS_HOST = 'screeps.com'
-ZIP_FILE_PATH = 'bot.zip'
 
-def upload_bot(zip_file_path, token):
-    # Extract files from the zip
+def upload_bot(path, token):
     modules = {}
-    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
-        for file_info in zip_ref.infolist():
-            with zip_ref.open(file_info) as file:
-                file_content = file.read().decode('utf-8')
-                module_name = file_info.filename.replace('.js', '').replace('.wasm', '')
-                modules[module_name] = file_content
+
+    if os.path.isfile(path) and path.endswith('.zip'):
+        # Extract files from the zip
+        with zipfile.ZipFile(path, 'r') as zip_ref:
+            for file_info in zip_ref.infolist():
+                with zip_ref.open(file_info) as file:
+                    file_content = file.read().decode('utf-8')
+                    module_name = file_info.filename.replace('.js', '').replace('.wasm', '')
+                    modules[module_name] = file_content
+    elif os.path.isdir(path):
+        # Read files from the directory
+        for root, _, files in os.walk(path):
+            for file_name in files:
+                if file_name.endswith('.js') or file_name.endswith('.wasm'):
+                    file_path = os.path.join(root, file_name)
+                    with open(file_path, 'r', encoding='utf-8') as file:
+                        file_content = file.read()
+                        module_name = os.path.relpath(file_path, path).replace('.js', '').replace('.wasm', '')
+                        modules[module_name] = file_content
+    else:
+        raise ValueError("The provided path is neither a .zip file nor a directory")
 
     # Prepare data for setting the code
     data = {
@@ -47,5 +61,10 @@ if __name__ == '__main__':
         print("Screeps token is not set. Please set SCREEPS_TOKEN environment variable.")
         exit(1)
 
-    upload_response = upload_bot(ZIP_FILE_PATH, SCREEPS_TOKEN)
+    if len(sys.argv) != 2:
+        print("Usage: python upload.py <path_to_zip_or_directory>")
+        exit(1)
+
+    path = sys.argv[1]
+    upload_response = upload_bot(path, SCREEPS_TOKEN)
     print("Bot code uploaded successfully:", upload_response)

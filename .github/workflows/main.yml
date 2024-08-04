@@ -69,4 +69,4 @@ jobs:
     - name: Upload bot.zip to Screeps
       env:
         SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
-      run: python .github/workflows/upload.py
+      run: python .github/workflows/upload.py bin/Release/net8.0/wasi-wasm/AppBundle/world/
