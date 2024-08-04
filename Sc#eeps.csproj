@@ -13,7 +13,6 @@
     <EventSourceSupport>false</EventSourceSupport>
     <UseSystemResourceKeys>true</UseSystemResourceKeys>
     <InvariantTimezone>true</InvariantTimezone>
-    <WasmEnableSIMD>true</WasmEnableSIMD>
     <WasmEnableBulkMemory>true</WasmEnableBulkMemory>
 </PropertyGroup>
 
