@@ -1,28 +1,32 @@
+global using ScreepsDotNet.API;
+global using ScreepsDotNet.API.Bot;
+global using ScreepsDotNet.API.World;
+global using ScreepsDotNet.Native.World;
+
+global using static Bot.ServiceCollection;
+
 using System;
 using System.Diagnostics.CodeAnalysis;
-
-using ScreepsDotNet.API.World;
+using Bot;
 
 namespace ScreepsDotNet
 {
     public static partial class Program
     {
-        private static IGame? game;
+        private static Looper? looper = null!;
 
         [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, typeof(Program))]
-        public static void Main()
-        {
-            // Keep the entrypoint platform independent and let Init (which is called from js) create the game instance
-            // This keeps the door open for unit testing later down the line
-        }
+        public static void Main() { }
 
         [System.Runtime.Versioning.SupportedOSPlatform("wasi")]
         public static void Init()
         {
             try
             {
-                game = new Native.World.NativeGame();
-                // TODO: Add startup logic here!
+                Register<IGame, NativeGame>();
+                Register<ILogger, Logger>();
+                Register<IBot, NeverBot>();
+                looper = new Looper();
             }
             catch (Exception ex)
             {
@@ -33,12 +37,9 @@ namespace ScreepsDotNet
         [System.Runtime.Versioning.SupportedOSPlatform("wasi")]
         public static void Loop()
         {
-            if (game == null) { return; }
             try
             {
-                game.Tick();
-                // TODO: Add loop logic here!
-                Console.WriteLine($"Hello world from C#, the current tick is {game.Time}");
+                looper!.Tick();
             }
             catch (Exception ex)
             {
