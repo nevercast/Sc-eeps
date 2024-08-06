@@ -1,0 +1,17 @@
+{
+  "configurations": [
+    {
+      "name": "C#: Sc#eeps",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}\\Sc#eeps.csproj",
+      "launchConfigurationId": "TargetFramework=;Sc#eeps"
+    },
+    {
+      "name": "C#: Sc#eeps Benchmarks",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}\\benchmarks\\benchmarks.csproj",
+    }
+  ]
+}
