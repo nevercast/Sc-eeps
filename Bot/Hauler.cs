@@ -144,16 +144,33 @@ public class Hauler
 
         // Priority order: Spawn, Extensions, Storage, Container
         var spawn = room.Find<IStructureSpawn>().FirstOrDefault(s => s.Store.GetFreeCapacity(ResourceType.Energy) > 0);
-        if (spawn != null) return spawn;
+        if (spawn != null)
+        {
+            Logger.Info($"FindOptimalDropoffTarget 1.${spawn}");
+            return spawn;
+        }
         var extension = room.Find<IStructureExtension>()
             .FirstOrDefault(e => e.Store.GetFreeCapacity(ResourceType.Energy) > 0);
-        if (extension != null) return extension;
+        if (extension != null)
+        {
+            Logger.Info($"FindOptimalDropoffTarget 2.${extension}");
+            return extension;
+        }
         var storage = room.Find<IStructureStorage>().FirstOrDefault();
-        if (storage != null && storage.Store.GetFreeCapacity(ResourceType.Energy) > 0) return storage;
+        if (storage != null && storage.Store.GetFreeCapacity(ResourceType.Energy) > 0)
+        {
+            Logger.Info($"FindOptimalDropoffTarget 3.${storage}");
+            return storage;
+        }
         var container = room.Find<IStructureContainer>().Where(c => c.Store.GetFreeCapacity(ResourceType.Energy) > 0)
             .OrderBy(c => hauler.RoomPosition.Position.LinearDistanceTo(c.RoomPosition.Position)).FirstOrDefault();
-        if (container != null) return container;
-
+        if (container != null)
+        {
+            Logger.Info($"FindOptimalDropoffTarget 4.${container}");
+            return container;
+        }
+        
+        Logger.Info($"FindOptimalDropoffTarget 5.${room.Controller}");
         // If no valid targets, return the controller (to drop near it)
         return room.Controller;
     }
