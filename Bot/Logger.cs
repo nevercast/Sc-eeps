@@ -4,6 +4,11 @@ namespace Bot;
 
 public class Logger : ILogger
 {
+
+  private Logger()
+  {
+  }
+
   private string Name { get; init; } = "Global";
   private readonly IGame _game = Inject<IGame>();
 
@@ -27,5 +32,10 @@ public class Logger : ILogger
   public static ILogger For(string name)
   {
     return new Logger { Name = name };
+  }
+
+  public static ILogger For(Type type)
+  {
+    return new Logger { Name = type.Name };
   }
 }

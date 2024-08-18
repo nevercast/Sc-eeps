@@ -2,8 +2,9 @@ using System.Linq;
 
 namespace Bot;
 
-public class BootstrapHarvester
+public static class BootstrapHarvester
 {
+    private static readonly ILogger _logger = Logger.For(typeof(BootstrapHarvester));
     private class BootstrapHarvesterState
     {
         public bool IsHarvesting { get; init;}
@@ -11,6 +12,7 @@ public class BootstrapHarvester
     
     public static void ExecuteHarvester(ICreep harvester)
     {
+        _logger.Info("Executing BootstrapHarvester");
         switch (harvester.GetUserData<BootstrapHarvesterState>()?.IsHarvesting)
         {
             case true: Harvest(harvester);
@@ -24,6 +26,7 @@ public class BootstrapHarvester
 
     private static void Init(ICreep harvester)
     {
+        _logger.Info("Executing Init");
         var closestSource = harvester.GetUnreservedSource();
         if (closestSource is null) return;
         harvester.SetSource(closestSource);
@@ -33,6 +36,7 @@ public class BootstrapHarvester
 
     private static void Deposit(ICreep harvester)
     {
+        _logger.Info("Executing Deposit");
         var depositTarget = harvester.Room?.Find<IStructureSpawn>().FirstOrDefault();
         if (depositTarget is null) return;
 
@@ -44,6 +48,7 @@ public class BootstrapHarvester
 
     private static void Harvest(ICreep harvester)
     {
+        _logger.Info("Executing Harvest");
         var source = harvester.GetSource();
         if (source is null)
         {

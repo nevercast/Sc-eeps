@@ -7,6 +7,7 @@ namespace Bot;
 public class CreepManager
 {
   private readonly IGame _game = Inject<IGame>();
+  private readonly ILogger _logger = Logger.For(typeof (CreepManager));
 
   private readonly Dictionary<CreepRole, Type> _roleMap = new()
   {
@@ -16,11 +17,13 @@ public class CreepManager
 
   public void Tick()
   {
+    _logger.Info("Ticking CreepManager");
     foreach (var creep in _game.Creeps.Values)
     {
       switch (creep.GetCreepRole())
       {
         case CreepRole.BootstrapHarvester:
+          _logger.Info("Execute BootstrapHarvester Creep");
           BootstrapHarvester.ExecuteHarvester(creep);
           break;
         case CreepRole.Harvester:
@@ -35,6 +38,12 @@ public class CreepManager
         case CreepRole.Builder:
           HandleBuilder(creep);
           break;
+        case CreepRole.Repairer:
+        case CreepRole.Defender:
+        case CreepRole.Scout:
+        case CreepRole.Claimer:
+        default:
+          throw new ArgumentOutOfRangeException();
       }
     }
   }
