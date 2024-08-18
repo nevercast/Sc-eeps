@@ -72,8 +72,7 @@ public class Hauler
         }
         else
         {
-            hauler.MoveTo(source.RoomPosition,
-                new MoveToOptions(FindPathOptions: new FindPathOptions(range: 2)));
+            hauler.MoveTo(source.RoomPosition, new MoveToOptions(FindPathOptions: new FindPathOptions(range: 2)));
         }
 
         if (hauler.Store.GetFreeCapacity(ResourceType.Energy) == 0)
@@ -93,12 +92,16 @@ public class Hauler
         }
 
         hauler.Room?.Visual.Line(hauler.RoomPosition.Position, dropoffTarget.RoomPosition.Position,
-            new LineVisualStyle(color: Color.FromNorm(0.62, 0.2, 0.95), lineStyle: LineStyle.Dashed)
-        );
-
-        if (dropoffTarget is IStructureController controller &&
-            hauler.UpgradeController(controller) == CreepUpgradeControllerResult.NotInRange ||
-            hauler.Transfer(dropoffTarget, ResourceType.Energy) == CreepTransferResult.NotInRange)
+            new LineVisualStyle(color: Color.FromNorm(0.62, 0.2, 0.95), lineStyle: LineStyle.Dashed));
+        if (dropoffTarget is IStructureController controller)
+        {
+            if (hauler.UpgradeController(controller) == CreepUpgradeControllerResult.NotInRange)
+            {
+                hauler.MoveTo(controller.RoomPosition,
+                    new MoveToOptions(FindPathOptions: new FindPathOptions(range: 2)));
+            }
+        }
+        else if (hauler.Transfer(dropoffTarget, ResourceType.Energy) == CreepTransferResult.NotInRange)
         {
             hauler.MoveTo(dropoffTarget.RoomPosition);
         }
