@@ -3,12 +3,12 @@ namespace ScreepsDotNet;
 
 public class Looper
 {
-  private readonly IGame game = Inject<IGame>();
-  private readonly IBot bot = Inject<IBot>();
+  private readonly IGame _game = Inject<IGame>();
+  private readonly IBot _bot = Inject<IBot>();
 
   public void Tick()
   {
-    game.Tick();
-    bot.Loop();
+    _game.Tick();
+    _bot.Loop();
   }
 }

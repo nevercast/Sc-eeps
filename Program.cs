@@ -13,7 +13,7 @@ namespace ScreepsDotNet
 {
     public static partial class Program
     {
-        private static Looper? looper = null!;
+        private static Looper? _looper = null!;
 
         [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, typeof(Program))]
         public static void Main() { }
@@ -26,7 +26,7 @@ namespace ScreepsDotNet
                 Register<IGame, NativeGame>();
                 Register<ILogger, Logger>();
                 Register<IBot, NeverBot>();
-                looper = new Looper();
+                _looper = new Looper();
             }
             catch (Exception ex)
             {
@@ -39,7 +39,7 @@ namespace ScreepsDotNet
         {
             try
             {
-                looper!.Tick();
+                _looper!.Tick();
             }
             catch (Exception ex)
             {
