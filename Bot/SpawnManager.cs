@@ -8,26 +8,44 @@ public class SpawnManager
 {
     private static readonly IGame Game = Inject<IGame>();
     private static readonly ILogger Logger = Bot.Logger.For(typeof(SpawnManager));
-
+    
     public static CreepRole? GetNextSpawnRole(IStructureSpawn spawn)
     {
-        if (!spawn.Exists || !spawn.My) return null;
+        Logger.Info($"Determining next spawn role for spawn {spawn.Id}");
+        if (!spawn.Exists || !spawn.My)
+        {
+            Logger.Warn($"Spawn {spawn.Id} does not exist or is not owned by us");
+            return null;
+        }
         var room = spawn.Room;
-        if (room == null) return null;
+        if (room == null)
+        {
+            Logger.Warn($"Room not found for spawn {spawn.Id}");
+            return null;
+        }
         var sources = room.Find<ISource>().ToList();
+        Logger.Info($"Room {room.Name} has {sources.Count} sources");
         var roomCreeps = Game.Creeps.Values.Where(c => Equals(c.Room, room)).ToList();
-        if (roomCreeps.Count == 0) return CreepRole.BootstrapHarvester;
+        Logger.Info($"Room {room.Name} has {roomCreeps.Count} creeps");
+        if (roomCreeps.Count == 0)
+        {
+            Logger.Info($"No creeps in room {room.Name}, spawning BootstrapHarvester");
+            return CreepRole.BootstrapHarvester;
+        }
         var creepCounts = roomCreeps.GroupBy(creep => creep.GetCreepRole())
             .ToDictionary(group => group.Key, group => group.Count());
         var harvesterCount = creepCounts.GetValueOrDefault(CreepRole.Harvester, 0);
         var haulerCount = creepCounts.GetValueOrDefault(CreepRole.Hauler, 0);
+        Logger.Info($"Room {room.Name} has {harvesterCount} harvesters and {haulerCount} haulers");
         if (harvesterCount == 0 && haulerCount == 0)
         {
+            Logger.Info($"No harvesters or haulers in room {room.Name}, spawning BootstrapHarvester");
             return CreepRole.BootstrapHarvester;
         }
 
         if (harvesterCount < sources.Count && (haulerCount > harvesterCount || harvesterCount == 0))
         {
+            Logger.Info($"Spawning Harvester in room {room.Name}");
             return CreepRole.Harvester;
         }
 
@@ -40,19 +58,23 @@ public class SpawnManager
         var haulerRequirements = new Calculations.HaulerRequirements(
             harvesterEnergyPerTick, haulerCarryCapacity, dropPositions);
         var requiredHaulers = Calculations.CalculateRequiredHaulers(sources, haulerRequirements, haulerBody);
+        Logger.Info($"Room {room.Name} requires {requiredHaulers} haulers");
         if (haulerCount < requiredHaulers)
         {
+            Logger.Info($"Spawning Hauler in room {room.Name}");
             return CreepRole.Hauler;
         }
 
         // Fallback
+        Logger.Info($"Spawning Upgrader in room {room.Name}");
         return CreepRole.Upgrader;
     }
 
     public static BodyType<BodyPartType> GetBodyForRole(CreepRole role, int rcl)
     {
+        Logger.Info($"Getting body for role {role} at RCL {rcl}");
         var energyCapacity = CalculateEnergyCapacity(rcl);
-        return role switch
+        var body = role switch
         {
             CreepRole.BootstrapHarvester => new BodyType<BodyPartType>([
                 (BodyPartType.Work, 1), (BodyPartType.Carry, 1), (BodyPartType.Move, 1)
@@ -62,7 +84,11 @@ public class SpawnManager
             CreepRole.Upgrader => GetUpgraderBody(energyCapacity),
             _ => throw new ArgumentException("Body not configured for role", nameof(role))
         };
+        Logger.Info($"Body for {role} at RCL {rcl}: {body}");
+        return body;
     }
+
+    
 
     private static BodyType<BodyPartType> CreateBodyFromSequence(IReadOnlyList<BodyPartType> sequence,
         int energyCapacity, IReadOnlyList<BodyPartType>? head = null, IReadOnlyList<BodyPartType>? tail = null)
@@ -156,19 +182,27 @@ public class SpawnManager
 
     public void HandleSpawn(IStructureSpawn spawn)
     {
-        if (spawn.Spawning != null) return;
+        Logger.Info($"Handling spawn for {spawn.Id}");
+        if (spawn.Spawning != null)
+        {
+            Logger.Info($"Spawn {spawn.Id} is already spawning");
+            return;
+        }
         var nextRole = SpawnManager.GetNextSpawnRole(spawn);
-        if (nextRole == null) return;
+        if (nextRole == null)
+        {
+            Logger.Info($"No next role determined for spawn {spawn.Id}");
+            return;
+        }
         var rcl = spawn.Room?.Controller?.Level ?? 1;
         var body = SpawnManager.GetBodyForRole(nextRole.Value, rcl);
         if (spawn.SpawnCreep(body, $"{nextRole}{Game.Time}", new SpawnCreepOptions(dryRun: true)) !=
             SpawnCreepResult.Ok)
         {
-            Logger.Warn($"Couldn't spawn {nextRole} ({body}).");
+            Logger.Warn($"Couldn't spawn {nextRole} ({body}) in room {spawn.Room?.Name}.");
             return;
         }
 
-        ;
         var memory = Game.CreateMemoryObject();
         memory.SetValue("role", (int)nextRole);
 
@@ -181,18 +215,30 @@ public class SpawnManager
                 if (source != null)
                 {
                     memory.SetValue(CreepExtensions.CreepMemoryKeySource, source.Id);
+                    Logger.Info($"Assigned source {source.Id} to {nextRole} in room {spawn.Room?.Name}");
                 }
-
+                else
+                {
+                    Logger.Warn($"Could not assign a source to {nextRole} in room {spawn.Room?.Name}");
+                }
                 break;
             // Add cases for other roles as needed
         }
 
-        spawn.SpawnCreep(body, $"{nextRole}{Game.Time}", new SpawnCreepOptions(memory: memory));
-        Logger.Info($"Spawning {nextRole} with body: {string.Join(",", body)}");
+        var spawnResult = spawn.SpawnCreep(body, $"{nextRole}{Game.Time}", new SpawnCreepOptions(memory: memory));
+        if (spawnResult == SpawnCreepResult.Ok)
+        {
+            Logger.Info($"Spawning {nextRole} with body: {string.Join(",", body)} in room {spawn.Room?.Name}");
+        }
+        else
+        {
+            Logger.Error($"Failed to spawn {nextRole} in room {spawn.Room?.Name}. Result: {spawnResult}");
+        }
     }
 
     private ISource? AssignSourceToCreep(IRoom room, CreepRole role)
     {
+        Logger.Info($"Assigning source to {role} in room {room.Name}");
         var sources = room.Find<ISource>().ToList();
         var creeps = Game.Creeps.Values.Where(c => Equals(c.Room, room)).ToList();
         var harvesterBody = GetBodyForRole(CreepRole.Harvester, room.Controller?.Level ?? 1);
@@ -207,18 +253,23 @@ public class SpawnManager
             harvesterEnergyPerTick, haulerCarryCapacity, dropPositions);
         var requiredHaulersPerSource = Calculations.CalculateRequiredHaulers(sources, haulerRequirements, haulerBody) /
                                        sources.Count;
+        Logger.Info($"Required haulers per source in room {room.Name}: {requiredHaulersPerSource}");
         foreach (var source in sources)
         {
             var creepsAssignedToSource = creeps.Count(c => c.GetSource() == source);
+            Logger.Info($"Source {source.Id} has {creepsAssignedToSource} creeps assigned");
             switch (role)
             {
                 case CreepRole.Harvester when creepsAssignedToSource == 0:
+                    Logger.Info($"Assigning harvester to source {source.Id} in room {room.Name}");
                     return source;
                 case CreepRole.Hauler when creepsAssignedToSource < requiredHaulersPerSource:
+                    Logger.Info($"Assigning hauler to source {source.Id} in room {room.Name}");
                     return source;
             }
         }
 
+        Logger.Warn($"Could not assign a source to {role} in room {room.Name}");
         return null;
     }
 }
