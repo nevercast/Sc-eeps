@@ -7,6 +7,8 @@ namespace Bot;
 public static class CreepExtensions
 {
   private static readonly ILogger Logger = Bot.Logger.For(typeof(CreepExtensions));
+  public static string CreepMemoryKeyRole = "role";
+  public static string CreepMemoryKeySource = "source";
 
   public static CreepRole GetCreepRole(this ICreep creep)
   {
@@ -16,7 +18,7 @@ public static class CreepExtensions
       return inMemoryRole.Value;
     }
 
-    if (creep.Memory.TryGetInt("role", out var role)) return (CreepRole)role;
+    if (creep.Memory.TryGetInt(CreepMemoryKeyRole, out var role)) return (CreepRole)role;
     Logger.Error($"Creep {creep.Name} has no role.");
     throw new TerminateCreepException(creep, "Creep has no role.");
   }
@@ -36,7 +38,7 @@ public static class CreepExtensions
       return source;
     }
 
-    var sourceId = creep.Memory.TryGetString("source");
+    var sourceId = creep.Memory.TryGetString(CreepMemoryKeySource);
     if (sourceId == null)
     {
       return null;
@@ -60,16 +62,6 @@ public static class CreepExtensions
 
   public static void SetSource<T>(this T creep, ObjectId objectId) where T : ICreep
   { 
-    creep.Memory.SetValue("source", objectId);
-  }
-
-  public static ISource? GetUnreservedSource<T>(this T creep, IRoom? room = null) where T: ICreep
-  {
-    Logger.Info("GetUnreservedSource");
-    var targetRoom = room ?? creep.Room;
-    Logger.Info($"GetUnreservedSource in {targetRoom?.Name}");
-    var result = targetRoom?.Find<ISource>().FirstOrDefault(source => !source.IsReserved());
-    Logger.Info($"GetUnreservedSource resolved to {result?.RoomPosition}");
-    return result;
+    creep.Memory.SetValue(CreepMemoryKeySource, objectId);
   }
 }

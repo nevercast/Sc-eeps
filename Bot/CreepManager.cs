@@ -88,5 +88,4 @@ public class CreepManager
       creep.MoveTo(constructionSite.RoomPosition);
     }
   }
-
 }

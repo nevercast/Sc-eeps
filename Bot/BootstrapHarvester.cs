@@ -27,7 +27,7 @@ public static class BootstrapHarvester
     private static void Init(ICreep harvester)
     {
         _logger.Info("Executing Init");
-        var closestSource = harvester.GetUnreservedSource();
+        var closestSource = harvester.Room?.GetUnreservedSource();
         if (closestSource is null) return;
         harvester.SetSource(closestSource);
         harvester.SetUserData(new BootstrapHarvesterState { IsHarvesting = true });
