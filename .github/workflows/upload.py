@@ -11,6 +11,11 @@ SCREEPS_TOKEN = os.getenv('SCREEPS_TOKEN')
 # Fixed variables
 SCREEPS_HOST = 'screeps.com'
 
+# The JavaScript files seem to start with an UTF-8 BOM
+# Decided to strip that.
+def remove_bom(content):
+    return content.lstrip('\ufeff')
+
 def upload_bot(path, token):
     modules = {}
 
@@ -21,7 +26,7 @@ def upload_bot(path, token):
                 with zip_ref.open(file_info) as file:
                     try:
                         if file_info.filename.endswith('.js'):
-                            file_content = file.read().decode('utf-8')
+                            file_content = remove_bom(file.read().decode('utf-8'))
                         elif file_info.filename.endswith('.wasm'):
                             file_content = base64.b64encode(file.read()).decode('utf-8')
                         else:
@@ -42,7 +47,7 @@ def upload_bot(path, token):
                     try:
                         if file_name.endswith('.js'):
                             with open(file_path, 'r', encoding='utf-8') as file:
-                                file_content = file.read()
+                                file_content = remove_bom(file.read())
                         elif file_name.endswith('.wasm'):
                             with open(file_path, 'rb') as file:
                                 file_content = base64.b64encode(file.read()).decode('utf-8')
