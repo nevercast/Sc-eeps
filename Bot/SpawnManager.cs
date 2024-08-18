@@ -45,11 +45,11 @@ public class SpawnManager
             return CreepRole.Hauler;
         }
 
-        // TODO: Upgrader/Builder
-        return null; // Return null if no creep needs to be spawned (we always need creeps tho :( )
+        // Fallback
+        return CreepRole.Upgrader;
     }
 
-    private static BodyType<BodyPartType> GetBodyForRole(CreepRole role, int rcl)
+    public static BodyType<BodyPartType> GetBodyForRole(CreepRole role, int rcl)
     {
         var energyCapacity = CalculateEnergyCapacity(rcl);
         return role switch
@@ -59,6 +59,7 @@ public class SpawnManager
             ]),
             CreepRole.Harvester => GetHarvesterBody(energyCapacity),
             CreepRole.Hauler => GetHaulerBody(energyCapacity),
+            CreepRole.Upgrader => GetUpgraderBody(energyCapacity),
             _ => throw new ArgumentException("Body not configured for role", nameof(role))
         };
     }
@@ -99,10 +100,10 @@ public class SpawnManager
                 .ToArray());
 
         // Calculate tail cost
-        int tailCost = tail?.Sum(part => bodyCosts[part]) ?? 0;
+        var tailCost = tail?.Sum(part => bodyCosts[part]) ?? 0;
 
         // Add main sequence
-        int index = 0;
+        var index = 0;
         while (remainingEnergy >= bodyCosts[sequence[index % sequence.Count]] + tailCost)
         {
             var part = sequence[index % sequence.Count];
@@ -128,6 +129,13 @@ public class SpawnManager
         return CreateBodyFromSequence(
             new[] { BodyPartType.Move, BodyPartType.Carry, BodyPartType.Carry, BodyPartType.Move, }, energyCapacity,
             head: new[] { BodyPartType.Move, BodyPartType.Carry }, tail: new[] { BodyPartType.Move });
+    }
+    
+    private static BodyType<BodyPartType> GetUpgraderBody(int energyCapacity)
+    {
+        return CreateBodyFromSequence(
+            new[] { BodyPartType.Move, BodyPartType.Carry, BodyPartType.Work, }, energyCapacity,
+            head: new[] { BodyPartType.Move, BodyPartType.Carry, BodyPartType.Work }, tail: new[] { BodyPartType.Move });
     }
 
     private static int CalculateEnergyCapacity(int rcl)
