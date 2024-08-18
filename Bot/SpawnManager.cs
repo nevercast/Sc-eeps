@@ -111,7 +111,11 @@ public class SpawnManager
         var body = SpawnManager.GetBodyForRole(nextRole.Value, rcl);
 
         if (spawn.SpawnCreep(body, $"{nextRole}{Game.Time}", new SpawnCreepOptions(dryRun: true)) !=
-            SpawnCreepResult.Ok) return;
+            SpawnCreepResult.Ok)
+        {
+            Logger.Warn($"Couldn't spawn {nextRole} ({body}).");
+            return;
+        };
 
         var memory = Game.CreateMemoryObject();
         memory.SetValue("role", (int)nextRole);
