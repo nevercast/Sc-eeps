@@ -132,7 +132,9 @@ public class Hauler
         };
         var haulerRequirements =
             new Calculations.HaulerRequirements(harvesterEnergyPerTick, haulerCarryCapacity, dropPositions);
-        return Calculations.CalculateRequiredHaulers(new[] { source }, haulerRequirements, haulerBody);
+        var requiredHaulers = Calculations.CalculateRequiredHaulers(new[] { source }, haulerRequirements, haulerBody);
+        Logger.Info($"CalculateRequiredHaulers ${source}: ${requiredHaulers}");
+        return requiredHaulers;
     }
 
     private static IStructure? FindOptimalDropoffTarget(ICreep hauler)
