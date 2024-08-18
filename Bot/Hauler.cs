@@ -66,12 +66,14 @@ public class Hauler
         {
             if (hauler.Pickup(droppedResources) == CreepPickupResult.NotInRange)
             {
-                hauler.MoveTo(droppedResources.RoomPosition);
+                hauler.MoveTo(droppedResources.RoomPosition,
+                    new MoveToOptions(FindPathOptions: new FindPathOptions(range: 2)));
             }
         }
         else
         {
-            hauler.MoveTo(source.RoomPosition);
+            hauler.MoveTo(source.RoomPosition,
+                new MoveToOptions(FindPathOptions: new FindPathOptions(range: 2)));
         }
 
         if (hauler.Store.GetFreeCapacity(ResourceType.Energy) == 0)
