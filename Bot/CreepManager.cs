@@ -30,7 +30,7 @@ public class CreepManager
           Harvester.ExecuteHarvester(creep);
           break;
         case CreepRole.Hauler:
-          HandleHauler(creep);
+          Hauler.ExecuteHauler(creep);
           break;
         case CreepRole.Upgrader:
           HandleUpgrader(creep);
@@ -45,18 +45,6 @@ public class CreepManager
         default:
           throw new ArgumentOutOfRangeException();
       }
-    }
-  }
-
-  private static void HandleHauler(ICreep creep)
-  {
-    var target = creep.Room!.Find<IStructure>().Where((structure) =>
-      structure is IStructureSpawn spawn && spawn.Store.GetFreeCapacity(ResourceType.Energy) > 0
-      || structure is IStructureExtension extension && extension.Store.GetFreeCapacity(ResourceType.Energy) > 0
-    ).FirstOrDefault() ?? throw new TerminateCreepException(creep, "No target found.");
-    if (creep.Transfer(target, ResourceType.Energy) == CreepTransferResult.NotInRange)
-    {
-      creep.MoveTo(target.RoomPosition);
     }
   }
 
