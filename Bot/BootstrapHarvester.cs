@@ -47,13 +47,14 @@ public static class BootstrapHarvester
         else
         {
             harvester.SetUserData(new BootstrapHarvesterState { IsHarvesting = true });
-            CheckForPromotion(harvester);
         }
     }
 
     private static void Harvest(ICreep harvester)
     {
         _logger.Info("Executing Harvest");
+        CheckForPromotion(harvester);
+        
         var source = harvester.GetSource();
         if (source is null)
         {
@@ -74,6 +75,7 @@ public static class BootstrapHarvester
 
     private static void CheckForPromotion(ICreep harvester)
     {
+        _logger.Info("Executing CheckForPromotion");
         // BootstrapHarvester promotes to Hauler if a Harvester gets assigned to our source.
         var assignedCreep = harvester.GetSource()?.GetSourceReservation()?.Creep;
         if (assignedCreep is null) return;
