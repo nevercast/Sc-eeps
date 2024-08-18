@@ -90,7 +90,9 @@ public class Hauler
             return;
         }
 
-        if (hauler.Transfer(dropoffTarget, ResourceType.Energy) == CreepTransferResult.NotInRange)
+        if (dropoffTarget is IStructureController controller &&
+            hauler.UpgradeController(controller) == CreepUpgradeControllerResult.NotInRange ||
+            hauler.Transfer(dropoffTarget, ResourceType.Energy) == CreepTransferResult.NotInRange)
         {
             hauler.MoveTo(dropoffTarget.RoomPosition);
         }
@@ -149,6 +151,7 @@ public class Hauler
             Logger.Info($"FindOptimalDropoffTarget 1.${spawn}");
             return spawn;
         }
+
         var extension = room.Find<IStructureExtension>()
             .FirstOrDefault(e => e.Store.GetFreeCapacity(ResourceType.Energy) > 0);
         if (extension != null)
@@ -156,12 +159,14 @@ public class Hauler
             Logger.Info($"FindOptimalDropoffTarget 2.${extension}");
             return extension;
         }
+
         var storage = room.Find<IStructureStorage>().FirstOrDefault();
         if (storage != null && storage.Store.GetFreeCapacity(ResourceType.Energy) > 0)
         {
             Logger.Info($"FindOptimalDropoffTarget 3.${storage}");
             return storage;
         }
+
         var container = room.Find<IStructureContainer>().Where(c => c.Store.GetFreeCapacity(ResourceType.Energy) > 0)
             .OrderBy(c => hauler.RoomPosition.Position.LinearDistanceTo(c.RoomPosition.Position)).FirstOrDefault();
         if (container != null)
@@ -169,7 +174,7 @@ public class Hauler
             Logger.Info($"FindOptimalDropoffTarget 4.${container}");
             return container;
         }
-        
+
         Logger.Info($"FindOptimalDropoffTarget 5.${room.Controller}");
         // If no valid targets, return the controller (to drop near it)
         return room.Controller;
