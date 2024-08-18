@@ -44,6 +44,10 @@ public static class BootstrapHarvester
         {
             harvester.MoveTo(depositTarget.RoomPosition);
         }
+        else
+        {
+            harvester.SetUserData(new BootstrapHarvesterState { IsHarvesting = true });
+        }
     }
 
     private static void Harvest(ICreep harvester)
