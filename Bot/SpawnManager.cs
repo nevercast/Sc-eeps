@@ -57,7 +57,7 @@ public class SpawnManager
         var dropPositions = new[] { spawn.RoomPosition };
         var haulerRequirements = new Calculations.HaulerRequirements(
             harvesterEnergyPerTick, haulerCarryCapacity, dropPositions);
-        var requiredHaulers = Calculations.CalculateRequiredHaulers(sources, haulerRequirements, haulerBody);
+        var requiredHaulers = Math.Min(8, Calculations.CalculateRequiredHaulers(sources, haulerRequirements, haulerBody));
         Logger.Info($"Room {room.Name} requires {requiredHaulers} haulers");
         if (haulerCount < requiredHaulers)
         {
