@@ -27,7 +27,7 @@ public class CreepManager
           BootstrapHarvester.ExecuteHarvester(creep);
           break;
         case CreepRole.Harvester:
-          HandleHarvester(creep);
+          Harvester.ExecuteHarvester(creep);
           break;
         case CreepRole.Hauler:
           HandleHauler(creep);
@@ -45,15 +45,6 @@ public class CreepManager
         default:
           throw new ArgumentOutOfRangeException();
       }
-    }
-  }
-
-    private static void HandleHarvester(ICreep creep)
-  {
-    var source = creep.Room!.Find<ISource>().FirstOrDefault() ?? throw new TerminateCreepException(creep, "No source found.");
-    if (creep.Harvest(source) == CreepHarvestResult.NotInRange)
-    {
-      creep.MoveTo(source.RoomPosition);
     }
   }
 
