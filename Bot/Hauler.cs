@@ -96,7 +96,7 @@ public class Hauler
         if (dropoffTarget is IStructureController controller)
         {
             Logger.Info("Dropping off to Controller");
-            if (hauler.UpgradeController(controller) == CreepUpgradeControllerResult.NotInRange)
+            if (hauler.UpgradeController(controller) != CreepUpgradeControllerResult.Ok)
             {
                 hauler.MoveTo(controller.RoomPosition,
                     new MoveToOptions(FindPathOptions: new FindPathOptions(range: 2)));
