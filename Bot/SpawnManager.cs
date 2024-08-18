@@ -26,7 +26,7 @@ public class SpawnManager
             return CreepRole.BootstrapHarvester;
         }
 
-        if (harvesterCount < sources.Count)
+        if (harvesterCount < sources.Count && (haulerCount > harvesterCount || harvesterCount == 0))
         {
             return CreepRole.Harvester;
         }
