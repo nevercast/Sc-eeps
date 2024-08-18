@@ -47,6 +47,7 @@ public static class BootstrapHarvester
         else
         {
             harvester.SetUserData(new BootstrapHarvesterState { IsHarvesting = true });
+            CheckForPromotion(harvester);
         }
     }
 
