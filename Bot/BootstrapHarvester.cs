@@ -70,4 +70,15 @@ public static class BootstrapHarvester
             harvester.SetUserData(new BootstrapHarvesterState { IsHarvesting = false });
         }
     }
+
+    private static void CheckForPromotion(ICreep harvester)
+    {
+        // BootstrapHarvester promotes to Hauler if a Harvester gets assigned to our source.
+        var assignedCreep = harvester.GetSource()?.GetSourceReservation()?.Creep;
+        if (assignedCreep is null) return;
+        if (assignedCreep != harvester)
+        {
+            harvester.SetCreepRole(CreepRole.Hauler);
+        }
+    }
 }

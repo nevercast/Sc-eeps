@@ -22,6 +22,17 @@ public static class CreepExtensions
     Logger.Error($"Creep {creep.Name} has no role.");
     throw new TerminateCreepException(creep, "Creep has no role.");
   }
+
+  public static void SetCreepRole(this ICreep creep, CreepRole role)
+  {
+    creep.SetUserData(new CreepConfiguration()
+    {
+      Role = role,
+      IsIdle = true
+    });
+    
+    creep.Memory.SetValue(CreepMemoryKeyRole, (int) role);
+  }
   
   // ReSharper disable once MemberCanBePrivate.Global
   [return: NotNullIfNotNull("defaultValue")]
