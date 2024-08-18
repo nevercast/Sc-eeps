@@ -42,7 +42,24 @@ public static class CreepExtensions
     }
 
     var game = Inject<IGame>();
-    return game.GetObjectById<ISource>(sourceId);
+    var obj = game.GetObjectById<ISource>(sourceId);
+    if (obj == null)
+    {
+      return null;
+    }
+    SetSource(creep, obj);
+    return obj;
+  }
+  
+  public static void SetSource<T>(this T creep, ISource source) where T : ICreep, IWithTargetSource
+  {     
+    creep.SetUserData(source);
+    SetSource(creep, source.Id);
+  }
+
+  public static void SetSource<T>(this T creep, ObjectId objectId) where T : ICreep, IWithTargetSource
+  { 
+    creep.Memory.SetValue("source", objectId);
   }
   
   // public static RoomObj

@@ -14,7 +14,7 @@ public class CreepManager
       switch (creep.GetCreepRole())
       {
         case CreepRole.BootstrapHarvester:
-          HandleBootstrapHarvester(creep);
+          BootstrapHarvester.ExecuteHarvester((IBootstrapHarvester)creep);
           break;
         case CreepRole.Harvester:
           HandleHarvester(creep);
@@ -31,12 +31,6 @@ public class CreepManager
       }
     }
   }
-
-  // Like harvester, but also returns to spawn to drop off energy
-    private void HandleBootstrapHarvester(ICreep creep)
-    {
-
-    }
 
     private static void HandleHarvester(ICreep creep)
   {
