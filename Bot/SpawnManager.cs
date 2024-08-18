@@ -66,8 +66,8 @@ public class SpawnManager
         }
 
         // Fallback
-        Logger.Info($"Spawning Upgrader in room {room.Name}");
-        return CreepRole.Upgrader;
+        // Logger.Info($"Spawning Upgrader in room {room.Name}");
+        return null;
     }
 
     public static BodyType<BodyPartType> GetBodyForRole(CreepRole role, int rcl)
