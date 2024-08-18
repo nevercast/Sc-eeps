@@ -4,11 +4,6 @@ namespace Bot;
 
 public class Logger : ILogger
 {
-
-  private Logger()
-  {
-  }
-
   private string Name { get; init; } = "Global";
   private readonly IGame _game = Inject<IGame>();
 
