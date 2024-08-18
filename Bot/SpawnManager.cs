@@ -63,25 +63,71 @@ public class SpawnManager
         };
     }
 
+    private static BodyType<BodyPartType> CreateBodyFromSequence(IReadOnlyList<BodyPartType> sequence,
+        int energyCapacity, IReadOnlyList<BodyPartType>? head = null, IReadOnlyList<BodyPartType>? tail = null)
+    {
+        var bodyCosts = new Dictionary<BodyPartType, int>
+        {
+            { BodyPartType.Move, 50 },
+            { BodyPartType.Work, 100 },
+            { BodyPartType.Carry, 50 },
+            { BodyPartType.Attack, 80 },
+            { BodyPartType.RangedAttack, 150 },
+            { BodyPartType.Heal, 250 },
+            { BodyPartType.Tough, 10 },
+            { BodyPartType.Claim, 600 }
+        };
+        var body = new List<BodyPartType>();
+        var remainingEnergy = energyCapacity;
+
+        // Function to add parts from a sequence
+        bool AddPartsFromSequence(IReadOnlyList<BodyPartType> seq)
+        {
+            foreach (var part in seq)
+            {
+                if (remainingEnergy < bodyCosts[part]) return false;
+                body.Add(part);
+                remainingEnergy -= bodyCosts[part];
+            }
+
+            return true;
+        }
+
+        // Add head sequence
+        if (head != null && !AddPartsFromSequence(head))
+            return new BodyType<BodyPartType>(body.GroupBy(part => part).Select(group => (group.Key, group.Count()))
+                .ToArray());
+
+        // Calculate tail cost
+        int tailCost = tail?.Sum(part => bodyCosts[part]) ?? 0;
+
+        // Add main sequence
+        int index = 0;
+        while (remainingEnergy >= bodyCosts[sequence[index % sequence.Count]] + tailCost)
+        {
+            var part = sequence[index % sequence.Count];
+            body.Add(part);
+            remainingEnergy -= bodyCosts[part];
+            index++;
+        }
+
+        // Add tail sequence
+        if (tail != null) AddPartsFromSequence(tail);
+        return new BodyType<BodyPartType>(body.GroupBy(part => part).Select(group => (group.Key, group.Count()))
+            .ToArray());
+    }
+
     private static BodyType<BodyPartType> GetHarvesterBody(int energyCapacity)
     {
-        var workParts = Math.Min(5, energyCapacity / 100);
-        var moveParts = (int)Math.Ceiling(workParts / 2.0);
-        return new BodyType<BodyPartType>([
-            (BodyPartType.Work, workParts),
-            (BodyPartType.Move, moveParts)
-        ]);
+        return CreateBodyFromSequence(new[] { BodyPartType.Work, }, energyCapacity,
+            head: new[] { BodyPartType.Move, BodyPartType.Work }, tail: new[] { BodyPartType.Move });
     }
 
     private static BodyType<BodyPartType> GetHaulerBody(int energyCapacity)
     {
-        var parts = energyCapacity / 100;
-        var carryParts = (int)Math.Floor(parts * 2.0 / 3);
-        var moveParts = parts - carryParts;
-        return new BodyType<BodyPartType>([
-            (BodyPartType.Carry, carryParts),
-            (BodyPartType.Move, moveParts)
-        ]);
+        return CreateBodyFromSequence(
+            new[] { BodyPartType.Move, BodyPartType.Carry, BodyPartType.Carry, BodyPartType.Move, }, energyCapacity,
+            head: new[] { BodyPartType.Move, BodyPartType.Carry }, tail: new[] { BodyPartType.Move });
     }
 
     private static int CalculateEnergyCapacity(int rcl)
@@ -103,20 +149,18 @@ public class SpawnManager
     public void HandleSpawn(IStructureSpawn spawn)
     {
         if (spawn.Spawning != null) return;
-
         var nextRole = SpawnManager.GetNextSpawnRole(spawn);
         if (nextRole == null) return;
-
         var rcl = spawn.Room?.Controller?.Level ?? 1;
         var body = SpawnManager.GetBodyForRole(nextRole.Value, rcl);
-
         if (spawn.SpawnCreep(body, $"{nextRole}{Game.Time}", new SpawnCreepOptions(dryRun: true)) !=
             SpawnCreepResult.Ok)
         {
             Logger.Warn($"Couldn't spawn {nextRole} ({body}).");
             return;
-        };
+        }
 
+        ;
         var memory = Game.CreateMemoryObject();
         memory.SetValue("role", (int)nextRole);
 
@@ -145,18 +189,16 @@ public class SpawnManager
         var creeps = Game.Creeps.Values.Where(c => Equals(c.Room, room)).ToList();
         var harvesterBody = GetBodyForRole(CreepRole.Harvester, room.Controller?.Level ?? 1);
         var haulerBody = GetBodyForRole(CreepRole.Hauler, room.Controller?.Level ?? 1);
-
         var harvesterEnergyPerTick = Calculations.CalculateHarvesterEnergyPerTick(harvesterBody);
         var haulerCarryCapacity = haulerBody[BodyPartType.Carry] * Game.Constants.Creep.CarryCapacity;
         var dropPositions = new[]
-            { room.Find<IStructureSpawn>().FirstOrDefault()?.RoomPosition ?? room.Controller!.RoomPosition };
-
+        {
+            room.Find<IStructureSpawn>().FirstOrDefault()?.RoomPosition ?? room.Controller!.RoomPosition
+        };
         var haulerRequirements = new Calculations.HaulerRequirements(
             harvesterEnergyPerTick, haulerCarryCapacity, dropPositions);
-
         var requiredHaulersPerSource = Calculations.CalculateRequiredHaulers(sources, haulerRequirements, haulerBody) /
                                        sources.Count;
-
         foreach (var source in sources)
         {
             var creepsAssignedToSource = creeps.Count(c => c.GetSource() == source);
