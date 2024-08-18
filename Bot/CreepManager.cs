@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Bot;
@@ -7,6 +8,12 @@ public class CreepManager
 {
   private readonly IGame _game = Inject<IGame>();
 
+  private readonly Dictionary<CreepRole, Type> _roleMap = new()
+  {
+    { CreepRole.BootstrapHarvester, typeof(BootstrapHarvester) }
+  };
+    
+
   public void Tick()
   {
     foreach (var creep in _game.Creeps.Values)
@@ -14,7 +21,7 @@ public class CreepManager
       switch (creep.GetCreepRole())
       {
         case CreepRole.BootstrapHarvester:
-          BootstrapHarvester.ExecuteHarvester((IBootstrapHarvester)creep);
+          BootstrapHarvester.ExecuteHarvester(creep);
           break;
         case CreepRole.Harvester:
           HandleHarvester(creep);

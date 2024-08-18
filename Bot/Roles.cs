@@ -38,12 +38,3 @@ public enum CreepRole {
     /// </summary>
     Claimer,
 }
-
-public interface IWithTargetSource : ICreep {
-    /// <summary>
-    /// The source the creep is currently targeting.
-    /// </summary>
-    ISource? TargetSource => this.GetSource();
-}
-
-public interface IBootstrapHarvester : ICreep, IWithTargetSource { }

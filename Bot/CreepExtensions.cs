@@ -28,7 +28,7 @@ public static class CreepExtensions
     return memory.TryGetString(key, out var value) ? value : defaultValue;
   }
 
-  public static ISource? GetSource<T>(this T creep) where T : ICreep, IWithTargetSource
+  public static ISource? GetSource<T>(this T creep) where T : ICreep
   {
     var source = creep.GetUserData<ISource>();
     if (source != null)
@@ -52,13 +52,13 @@ public static class CreepExtensions
     return obj;
   }
   
-  public static void SetSource<T>(this T creep, ISource source) where T : ICreep, IWithTargetSource
+  public static void SetSource<T>(this T creep, ISource source) where T : ICreep
   {     
     creep.SetUserData(source);
     SetSource(creep, source.Id);
   }
 
-  public static void SetSource<T>(this T creep, ObjectId objectId) where T : ICreep, IWithTargetSource
+  public static void SetSource<T>(this T creep, ObjectId objectId) where T : ICreep
   { 
     creep.Memory.SetValue("source", objectId);
   }

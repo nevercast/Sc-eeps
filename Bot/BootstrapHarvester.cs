@@ -2,16 +2,14 @@ using System.Linq;
 
 namespace Bot;
 
-public static class BootstrapHarvester
+public class BootstrapHarvester
 {
-    private static IGame _game = Inject<IGame>();
-    
     private class BootstrapHarvesterState
     {
         public bool IsHarvesting { get; init;}
     }
     
-    public static void ExecuteHarvester(IBootstrapHarvester harvester)
+    public static void ExecuteHarvester(ICreep harvester)
     {
         switch (harvester.GetUserData<BootstrapHarvesterState>()?.IsHarvesting)
         {
@@ -24,19 +22,16 @@ public static class BootstrapHarvester
         }
     }
 
-    private static void Init(IBootstrapHarvester harvester)
+    private static void Init(ICreep harvester)
     {
         var closestSource = harvester.GetUnreservedSource();
         if (closestSource is null) return;
         harvester.SetSource(closestSource);
         harvester.SetUserData(new BootstrapHarvesterState { IsHarvesting = true });
-        closestSource.SetSourceReservation(new SourceExtensions.SourceReservation()
-        {
-            Creep = harvester
-        });
+        closestSource.SetSourceReservation(new SourceExtensions.SourceReservation(harvester));
     }
 
-    private static void Deposit(IBootstrapHarvester harvester)
+    private static void Deposit(ICreep harvester)
     {
         var depositTarget = harvester.Room?.Find<IStructureSpawn>().FirstOrDefault();
         if (depositTarget is null) return;
@@ -47,9 +42,9 @@ public static class BootstrapHarvester
         }
     }
 
-    private static void Harvest(IBootstrapHarvester harvester)
+    private static void Harvest(ICreep harvester)
     {
-        var source = harvester.TargetSource;
+        var source = harvester.GetSource();
         if (source is null)
         {
             harvester.SetUserData<BootstrapHarvesterState>(null /* reinit */);

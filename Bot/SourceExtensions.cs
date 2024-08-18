@@ -7,9 +7,9 @@ public static class SourceExtensions
 {
   private static readonly ILogger Logger = Bot.Logger.For("SourceExtensions");
 
-  public class SourceReservation
+  public class SourceReservation(ICreep creep)
   {
-    public ICreep Creep { get; init; }
+    public ICreep Creep { get; init; } = creep;
   }
 
   public static SourceReservation? GetSourceReservation(this ISource source)
