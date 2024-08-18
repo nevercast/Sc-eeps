@@ -90,6 +90,10 @@ public class Hauler
             return;
         }
 
+        hauler.Room?.Visual.Line(hauler.RoomPosition.Position, dropoffTarget.RoomPosition.Position,
+            new LineVisualStyle(color: Color.FromNorm(0.62, 0.2, 0.95), lineStyle: LineStyle.Dashed)
+        );
+
         if (dropoffTarget is IStructureController controller &&
             hauler.UpgradeController(controller) == CreepUpgradeControllerResult.NotInRange ||
             hauler.Transfer(dropoffTarget, ResourceType.Energy) == CreepTransferResult.NotInRange)
