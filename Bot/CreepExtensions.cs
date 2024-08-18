@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Bot;
 
@@ -61,6 +62,10 @@ public static class CreepExtensions
   { 
     creep.Memory.SetValue("source", objectId);
   }
-  
-  // public static RoomObj
+
+  public static ISource? GetUnreservedSource<T>(this T creep, IRoom? room = null) where T: ICreep
+  {
+    var targetRoom = room ?? creep.Room;
+    return targetRoom?.Find<ISource>().FirstOrDefault(source => !source.IsReserved());
+  }
 }

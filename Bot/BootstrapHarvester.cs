@@ -26,10 +26,14 @@ public static class BootstrapHarvester
 
     private static void Init(IBootstrapHarvester harvester)
     {
-        var closestSource = harvester.Room?.Find<ISource>().FirstOrDefault();
+        var closestSource = harvester.GetUnreservedSource();
         if (closestSource is null) return;
         harvester.SetSource(closestSource);
         harvester.SetUserData(new BootstrapHarvesterState { IsHarvesting = true });
+        closestSource.SetSourceReservation(new SourceExtensions.SourceReservation()
+        {
+            Creep = harvester
+        });
     }
 
     private static void Deposit(IBootstrapHarvester harvester)
