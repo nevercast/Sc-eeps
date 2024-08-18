@@ -5,11 +5,11 @@ namespace Bot;
 
 public class CreepManager
 {
-  private readonly IGame game = Inject<IGame>();
+  private readonly IGame _game = Inject<IGame>();
 
   public void Tick()
   {
-    foreach (var creep in game.Creeps.Values)
+    foreach (var creep in _game.Creeps.Values)
     {
       switch (creep.GetCreepRole())
       {

@@ -12,8 +12,8 @@ namespace Bot;
 /// </summary>
 public static class ServiceCollection
 {
-  private static readonly Dictionary<Type, object> _instantiatedServices = new();
-  private static readonly Dictionary<Type, Func<object>> _factories = new();
+  private static readonly Dictionary<Type, object> InstantiatedServices = new();
+  private static readonly Dictionary<Type, Func<object>> Factories = new();
 
   /// <summary>
   /// Registers a service with the service collection.
@@ -22,19 +22,12 @@ public static class ServiceCollection
   /// <typeparam name="T">The type of service to register.</typeparam>
   public static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(Func<T>? factory = null) where T : class
   {
-    if (_factories.ContainsKey(typeof(T)))
+    if (Factories.ContainsKey(typeof(T)))
     {
       throw new InvalidOperationException($"Service of type {typeof(T).Name} is already registered.");
     }
 
-    if (factory != null)
-    {
-      _factories.Add(typeof(T), () => factory());
-    }
-    else
-    {
-      _factories.Add(typeof(T), Activator.CreateInstance<T>);
-    }
+    Factories.Add(typeof(T), factory ?? Activator.CreateInstance<T>);
   }
 
   /// <summary>
@@ -46,12 +39,12 @@ public static class ServiceCollection
     where TService : class
     where TImplementation : class, TService, new()
   {
-    if (_factories.ContainsKey(typeof(TService)))
+    if (Factories.ContainsKey(typeof(TService)))
     {
       throw new InvalidOperationException($"Service of type {typeof(TService).Name} is already registered.");
     }
 
-    _factories.Add(typeof(TService), Activator.CreateInstance<TImplementation>);
+    Factories.Add(typeof(TService), Activator.CreateInstance<TImplementation>);
   }
 
   /// <summary>
@@ -61,16 +54,13 @@ public static class ServiceCollection
   /// <returns>The service instance.</returns>
   public static T Inject<T>()
   {
-    if (!_instantiatedServices.ContainsKey(typeof(T)))
+    if (InstantiatedServices.ContainsKey(typeof(T))) return (T)InstantiatedServices[typeof(T)];
+    if (!Factories.ContainsKey(typeof(T)))
     {
-      if (!_factories.ContainsKey(typeof(T)))
-      {
-        throw new InvalidOperationException($"Service of type {typeof(T).Name} is not registered.");
-      }
-
-      _instantiatedServices.Add(typeof(T), _factories[typeof(T)]());
+      throw new InvalidOperationException($"Service of type {typeof(T).Name} is not registered.");
     }
 
-    return (T) _instantiatedServices[typeof(T)];
+    InstantiatedServices.Add(typeof(T), Factories[typeof(T)]());
+    return (T) InstantiatedServices[typeof(T)];
   }
 }

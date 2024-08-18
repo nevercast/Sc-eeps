@@ -4,25 +4,24 @@ namespace Bot;
 
 public class Logger : ILogger
 {
-  protected string Name { get; private set; } = "Global";
-
-  private readonly IGame game = Inject<IGame>();
+  private string Name { get; init; } = "Global";
+  private readonly IGame _game = Inject<IGame>();
 
   public void Error(string message)
   {
-    Console.WriteLine($"[{game.Time}] [{Name}] [ERROR] {message}");
-    game.Notify($"[{Name}] [ERROR] {message}", groupInterval: 1);
+    Console.WriteLine($"[{_game.Time}] [{Name}] [ERROR] {message}");
+    _game.Notify($"[{Name}] [ERROR] {message}", groupInterval: 1);
   }
 
   public void Warn(string message)
   {
-    Console.WriteLine($"[{game.Time}] [{Name}] [WARN] {message}");
-    game.Notify($"[{Name}] [WARN] {message}", groupInterval: 5);
+    Console.WriteLine($"[{_game.Time}] [{Name}] [WARN] {message}");
+    _game.Notify($"[{Name}] [WARN] {message}", groupInterval: 5);
   }
 
   public void Info(string message)
   {
-    Console.WriteLine($"[{game.Time}] [{Name}] [INFO] {message}");
+    Console.WriteLine($"[{_game.Time}] [{Name}] [INFO] {message}");
   }
 
   public static ILogger For(string name)

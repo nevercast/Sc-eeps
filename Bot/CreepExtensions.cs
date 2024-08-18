@@ -44,4 +44,6 @@ public static class CreepExtensions
     var game = Inject<IGame>();
     return game.GetObjectById<ISource>(sourceId);
   }
+  
+  // public static RoomObj
 }
