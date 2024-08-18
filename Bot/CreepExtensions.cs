@@ -6,7 +6,7 @@ namespace Bot;
 
 public static class CreepExtensions
 {
-  private static readonly ILogger Logger = Bot.Logger.For("CreepExtensions");
+  private static readonly ILogger Logger = Bot.Logger.For(typeof(CreepExtensions));
 
   public static CreepRole GetCreepRole(this ICreep creep)
   {
@@ -65,7 +65,11 @@ public static class CreepExtensions
 
   public static ISource? GetUnreservedSource<T>(this T creep, IRoom? room = null) where T: ICreep
   {
+    Logger.Info("GetUnreservedSource");
     var targetRoom = room ?? creep.Room;
-    return targetRoom?.Find<ISource>().FirstOrDefault(source => !source.IsReserved());
+    Logger.Info($"GetUnreservedSource in {targetRoom?.Name}");
+    var result = targetRoom?.Find<ISource>().FirstOrDefault(source => !source.IsReserved());
+    Logger.Info($"GetUnreservedSource resolved to {result?.RoomPosition}");
+    return result;
   }
 }
